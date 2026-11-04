@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SiteGuard — тест Telegram</title>
+  <style>
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      max-width: 480px;
+      margin: 60px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+    button {
+      font-size: 18px;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      background: #2481cc;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.6;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 16px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>SiteGuard</h1>
+  <button id="btn">Отправить тест в Telegram</button>
+  <div id="result"></div>
+
+  <script>
+    const btn = document.getElementById('btn');
+    const result = document.getElementById('result');
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      result.textContent = 'Отправляю...';
+      try {
+        const response = await fetch('/api/test-telegram', { method: 'POST' });
+        const data = await response.json();
+        if (response.ok && data.ok) {
+          result.textContent = '✅ Отправлено. Проверь Telegram.';
+        } else {
+          result.textContent = '❌ Ошибка: ' + (data.error || 'неизвестная ошибка');
+        }
+      } catch (err) {
+        result.textContent = '❌ Ошибка сети: ' + err.message;
+      }
+      btn.disabled = false;
+    });
+  </script>
+</body>
+</html>
