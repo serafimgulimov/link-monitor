@@ -1,0 +1,40 @@
+interface Env {
+  TELEGRAM_BOT_TOKEN: string;
+  TELEGRAM_CHAT_ID: string;
+}
+
+export const onRequestPost: PagesFunction<Env> = async ({ env }) => {
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) {
+    return json({ ok: false, error: 'Не заданы TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID' }, 500);
+  }
+
+  try {
+    const tgResponse = await fetch(
+      `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: env.TELEGRAM_CHAT_ID,
+          text: '✅ SiteGuard: тестовое сообщение. Связка работает.',
+        }),
+      }
+    );
+
+    const tgData: any = await tgResponse.json();
+
+    if (!tgResponse.ok || !tgData.ok) {
+      return json({ ok: false, error: tgData.description || 'Ошибка Telegram API' }, 502);
+    }
+
+    return json({ ok: true });
+  } catch (err: any) {
+    return json({ ok: false, error: err.message }, 500);
+  }
+};
